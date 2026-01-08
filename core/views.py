@@ -3,6 +3,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Avg
 from .models import Space, Booking, OccupancyLog
+from .utils import generate_occupancy_graph
 
 class SpaceListView(ListView):
     model = Space
@@ -21,6 +22,8 @@ class SpaceDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         # Optional: Add recent occupancy logs
         context['recent_logs'] = self.object.occupancy_logs.order_by('-timestamp')[:5]
+        # Generate graph
+        context['graph_image'] = generate_occupancy_graph(self.object.id)
         return context
 
 class BookingListView(LoginRequiredMixin, ListView):
