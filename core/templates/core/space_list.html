@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Coworking Spaces</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for space in spaces %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-4">
+            <h2 class="text-xl font-bold mb-2">{{ space.name }}</h2>
+            <p class="text-gray-600 mb-4">{{ space.description|truncatewords:20 }}</p>
+            <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                <span>Capacity: {{ space.capacity }}</span>
+                <span>${{ space.price_per_hour }}/hr</span>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+                {% for amenity in space.amenities.all %}
+                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{{ amenity.name }}</span>
+                {% endfor %}
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'space_detail' space.pk %}" class="block w-full bg-blue-600 text-white text-center py-2 rounded hover:bg-blue-700 transition">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="col-span-3 text-center text-gray-500">No spaces available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

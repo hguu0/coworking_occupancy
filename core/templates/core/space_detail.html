@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="p-8">
+        <div class="flex justify-between items-start mb-6">
+            <h1 class="text-4xl font-bold">{{ space.name }}</h1>
+            <span class="text-2xl font-bold text-green-600">${{ space.price_per_hour }}/hr</span>
+        </div>
+        
+        <p class="text-gray-700 text-lg mb-8">{{ space.description }}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Details</h3>
+                <ul class="space-y-2">
+                    <li class="flex items-center">
+                        <span class="font-medium mr-2">Capacity:</span> {{ space.capacity }} people
+                    </li>
+                    <li class="flex items-center">
+                        <span class="font-medium mr-2">Created:</span> {{ space.created_at|date:"M d, Y" }}
+                    </li>
+                </ul>
+            </div>
+            
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Amenities</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for amenity in space.amenities.all %}
+                    <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">{{ amenity.name }}</span>
+                    {% empty %}
+                    <span class="text-gray-500">No amenities listed.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t pt-8">
+            <h3 class="text-2xl font-bold mb-4">Book this Space</h3>
+            <!-- Booking Button/Form Placeholder -->
+            {% if user.is_authenticated %}
+                <a href="#" class="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded hover:bg-green-700 transition">
+                    Book Now
+                </a>
+            {% else %}
+                <p class="bg-yellow-100 p-4 rounded text-yellow-800">
+                    Please <a href="/admin/login/?next={{ request.path }}" class="underline font-bold">login</a> to book this space.
+                </p>
+            {% endif %}
+        </div>
+        
+        <!-- Occupancy Stats Section (Placeholder for Phase 4) -->
+        <div class="mt-12">
+            <h3 class="text-2xl font-bold mb-4">Occupancy Trends</h3>
+            <div class="bg-gray-50 p-6 rounded-lg text-center text-gray-500">
+                {% if graph_image %}
+                    <img src="data:image/png;base64,{{ graph_image }}" alt="Occupancy Graph" class="mx-auto">
+                {% else %}
+                    Graph will appear here (Phase 4).
+                {% endif %}
+            </div>
+            
+             <h4 class="font-bold mt-4">Recent Logs</h4>
+             <ul>
+                 {% for log in recent_logs %}
+                 <li>{{ log.timestamp|date:"M d H:i" }} - {{ log.occupied_count }} people ({{ log.temperature }}°C)</li>
+                 {% endfor %}
+             </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
