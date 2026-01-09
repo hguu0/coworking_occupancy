@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden p-6">
+    <h2 class="text-2xl font-bold mb-4">Book {{ space.name }}</h2>
+    <p class="mb-4 text-gray-600">Rate: ${{ space.price_per_hour }}/hr</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Start Time</label>
+            {{ form.start_time }}
+            {{ form.start_time.errors }}
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">End Time</label>
+            {{ form.end_time }}
+            {{ form.end_time.errors }}
+        </div>
+        
+        <div class="flex items-center justify-between">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
+                Confirm Booking
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

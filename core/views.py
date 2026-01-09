@@ -4,6 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Avg
 from .models import Space, Booking, OccupancyLog
 from .utils import generate_occupancy_graph
+from .forms import BookingForm
+from django.urls import reverse_lazy
 
 class SpaceListView(ListView):
     model = Space
@@ -34,3 +36,20 @@ class BookingListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user).order_by('-start_time')
 
+
+class BookingCreateView(LoginRequiredMixin, CreateView):
+    model = Booking
+    form_class = BookingForm
+    template_name = 'core/booking_form.html'
+    success_url = reverse_lazy('booking_list')
+
+    def form_valid(self, form):
+        space = get_object_or_404(Space, pk=self.kwargs['space_id'])
+        form.instance.space = space
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['space'] = get_object_or_404(Space, pk=self.kwargs['space_id'])
+        return context
