@@ -1,11 +1,13 @@
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Avg
-from .models import Space, Booking, OccupancyLog
+from django.db.models import Count
+from django.urls import reverse_lazy
+
+from .models import Space, Booking
 from .utils import generate_occupancy_graph
 from .forms import BookingForm
-from django.urls import reverse_lazy
+
 
 class SpaceListView(ListView):
     model = Space
@@ -15,6 +17,7 @@ class SpaceListView(ListView):
     def get_queryset(self):
         return Space.objects.annotate(booking_count=Count('bookings'))
 
+
 class SpaceDetailView(DetailView):
     model = Space
     template_name = 'core/space_detail.html'
@@ -23,18 +26,22 @@ class SpaceDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Optional: Add recent occupancy logs
-        context['recent_logs'] = self.object.occupancy_logs.order_by('-timestamp')[:5]
+        context['recent_logs'] = self.object.occupancy_logs.order_by(
+            '-timestamp')[:5]
         # Generate graph
         context['graph_image'] = generate_occupancy_graph(self.object.id)
         return context
+
 
 class BookingListView(LoginRequiredMixin, ListView):
     model = Booking
     template_name = 'core/booking_list.html'
     context_object_name = 'bookings'
-    
+
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).order_by('-start_time')
+        return Booking.objects.filter(
+            user=self.request.user
+        ).order_by('-start_time')
 
 
 class BookingCreateView(LoginRequiredMixin, CreateView):
@@ -48,8 +55,10 @@ class BookingCreateView(LoginRequiredMixin, CreateView):
         form.instance.space = space
         form.instance.user = self.request.user
         return super().form_valid(form)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['space'] = get_object_or_404(Space, pk=self.kwargs['space_id'])
+        context['space'] = get_object_or_404(
+            Space, pk=self.kwargs['space_id'])
         return context
+
