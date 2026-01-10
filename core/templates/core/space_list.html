@@ -13,6 +13,20 @@
                 <span>Capacity: {{ space.capacity }}</span>
                 <span>${{ space.price_per_hour }}/hr</span>
             </div>
+
+            <!-- Current Occupancy Indicator -->
+            <div class="mb-4">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="font-semibold text-gray-700">Current Occupancy:</span>
+                    <span class="font-bold {% if space.occupancy_color == 'red' %}text-red-600{% elif space.occupancy_color == 'yellow' %}text-yellow-600{% else %}text-green-600{% endif %}">
+                        {{ space.current_occupancy }}/{{ space.capacity }} ({{ space.occupancy_percentage }}%)
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-{{ space.occupancy_color }}-600 h-2.5 rounded-full" style="width: {{ space.occupancy_percentage }}%"></div>
+                </div>
+            </div>
+
             <div class="flex flex-wrap gap-2 mb-4">
                 {% for amenity in space.amenities.all %}
                 <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{{ amenity.name }}</span>

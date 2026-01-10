@@ -41,8 +41,14 @@ class OccupancyLog(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='occupancy_logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     occupied_count = models.IntegerField()
-    temperature = models.FloatField(null=True, blank=True)
+    # Weather factors
+    temperature = models.FloatField(null=True, blank=True) # Celsius
+    pressure = models.FloatField(null=True, blank=True) # mmHg
+    precipitation = models.FloatField(null=True, blank=True, default=0.0) # mm
+    # External factors
+    traffic_index = models.IntegerField(default=0, help_text="0-10 scale")
     is_holiday = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.space.name} - {self.timestamp} ({self.occupied_count})"
+        temp_str = f"{self.temperature:.1f}°C" if self.temperature is not None else "N/A"
+        return f"{self.space.name} @ {self.timestamp.strftime('%Y-%m-%d %H:%M')} | Occ: {self.occupied_count} | Temp: {temp_str}"

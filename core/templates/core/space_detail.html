@@ -10,6 +10,44 @@
         
         <p class="text-gray-700 text-lg mb-8">{{ space.description }}</p>
 
+        <!-- Visualization Settings (Advanced) -->
+        <div class="mb-8 border border-gray-200 rounded p-4 bg-gray-50">
+            <details>
+                <summary class="cursor-pointer font-semibold text-blue-600 hover:text-blue-800 select-none">
+                    Advanced Visualization Settings
+                </summary>
+                <form method="get" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    
+                    <!-- Window Size Slider -->
+                    <div>
+                        <label for="window_size" class="block text-sm font-medium text-gray-700 mb-1">
+                            Smoothing Window: <span id="windowVal">{{ window_size }}</span>
+                        </label>
+                        <input type="range" id="window_size" name="window_size" min="1" max="20" value="{{ window_size }}" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                               oninput="document.getElementById('windowVal').innerText = this.value">
+                        <p class="text-xs text-gray-500 mt-1">Increasing smooths noisy data.</p>
+                    </div>
+
+                    <!-- Outliers Checkbox -->
+                    <div class="flex items-center h-full pb-3">
+                        <input id="remove_outliers" name="remove_outliers" type="checkbox" {% if remove_outliers %}checked{% endif %}
+                               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="remove_outliers" class="ml-2 text-sm font-medium text-gray-900">
+                            Check to Remove Outliers (Denoiser)
+                        </label>
+                    </div>
+
+                    <!-- Apply Button -->
+                    <div>
+                        <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 focus:outline-none">
+                            Apply Settings
+                        </button>
+                    </div>
+                </form>
+            </details>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
                 <h3 class="text-xl font-semibold mb-4">Details</h3>
@@ -49,21 +87,45 @@
             {% endif %}
         </div>
         
-        <!-- Occupancy Stats Section (Placeholder for Phase 4) -->
+        <!-- Factor Correlations -->
         <div class="mt-12">
-            <h3 class="text-2xl font-bold mb-4">Occupancy Trends</h3>
+            <h3 class="text-2xl font-bold mb-4">Factor Correlations</h3>
             <div class="bg-gray-50 p-6 rounded-lg text-center text-gray-500">
-                {% if graph_image %}
-                    <img src="data:image/png;base64,{{ graph_image }}" alt="Occupancy Graph" class="mx-auto">
+                {% if correlation_image %}
+                    <img src="data:image/png;base64,{{ correlation_image }}" alt="Correlation Graphs" class="mx-auto w-full">
                 {% else %}
-                    Graph will appear here (Phase 4).
+                    Not enough data for correlations.
                 {% endif %}
+            </div>
+        </div>
+
+        <!-- Occupancy Stats Section (Phase 4) -->
+        <div class="mt-12">
+            <h3 class="text-2xl font-bold mb-4">Occupancy Trends & Prediction</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-50 p-6 rounded-lg text-center text-gray-500">
+                    <h4 class="font-bold mb-2">Historical Data</h4>
+                    {% if graph_image %}
+                        <img src="data:image/png;base64,{{ graph_image }}" alt="Occupancy Graph" class="mx-auto w-full">
+                    {% else %}
+                        Not enough data for history.
+                    {% endif %}
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg text-center text-gray-500">
+                    <h4 class="font-bold mb-2">Predicted Occupancy (Next 7 Days)</h4>
+                    {% if prediction_image %}
+                        <img src="data:image/png;base64,{{ prediction_image }}" alt="Prediction Graph" class="mx-auto w-full">
+                    {% else %}
+                        Not enough data for prediction.
+                    {% endif %}
+                </div>
             </div>
             
              <h4 class="font-bold mt-4">Recent Logs</h4>
-             <ul>
+             <ul class="text-sm text-gray-600">
                  {% for log in recent_logs %}
-                 <li>{{ log.timestamp|date:"M d H:i" }} - {{ log.occupied_count }} people ({{ log.temperature }}°C)</li>
+                 <li>{{ log }}</li>
                  {% endfor %}
              </ul>
         </div>

@@ -6,4 +6,5 @@ urlpatterns = [
     path('space/<int:pk>/', views.SpaceDetailView.as_view(), name='space_detail'),
     path('space/<int:space_id>/book/', views.BookingCreateView.as_view(), name='book_space'),
     path('bookings/', views.BookingListView.as_view(), name='booking_list'),
+    path('bookings/<int:pk>/edit/', views.BookingUpdateView.as_view(), name='booking_edit'),
 ]
