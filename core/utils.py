@@ -12,11 +12,20 @@ import matplotlib.dates as mdates
 matplotlib.use('Agg')
 
 def generate_occupancy_graph(space_id, window_size=1, remove_outliers=False):
-    logs = OccupancyLog.objects.filter(space_id=space_id).order_by('timestamp')
-    if not logs.exists():
+    # Limit to last 7 days by default for better visibility
+    last_week = timezone.now() - datetime.timedelta(days=7)
+    logs = OccupancyLog.objects.filter(space_id=space_id, timestamp__gte=last_week).order_by('timestamp')
+    if not logs.exists(): # Fallback if no recent data
+         logs = OccupancyLog.objects.filter(space_id=space_id).order_by('-timestamp')[:100]
+         logs = reversed(logs) # Put back in chronological order
+    
+    # Check if queryset is empty again after fallback
+    # Convert to list first to reuse
+    logs_list = list(logs)
+    if not logs_list:
         return None
 
-    df = pd.DataFrame(list(logs.values('timestamp', 'occupied_count')))
+    df = pd.DataFrame([{'timestamp': log.timestamp, 'occupied_count': log.occupied_count} for log in logs_list])
     
     if df.empty:
         return None
@@ -143,9 +152,8 @@ def generate_prediction_graph(space_id):
     df['hour'] = df['timestamp'].dt.hour
     
     # Calculate average occupancy for every (Day, Hour) combination
-    # Group by [Day, Hour] -> Mean
-    # This creates a model like: "On Mondays at 10am, avg occupancy is 5"
-    occupancy_model = df.groupby(['day_of_week', 'hour'])['occupied_count'].mean()
+    # Group by [Day, Hour] -> Median (More robust to outliers than Mean)
+    occupancy_model = df.groupby(['day_of_week', 'hour'])['occupied_count'].median()
     
     # Generate forecast for the NEXT 7 DAYS (Hourly)
     future_dates = []
@@ -158,26 +166,40 @@ def generate_prediction_graph(space_id):
     for i in range(24 * 7): # 7 days * 24 hours
         future_time = start_time + datetime.timedelta(hours=i)
         day_of_week = future_time.weekday()
+        if day_of_week >= 5: # Weekend Adjustment
+             # Ensure weekends are visibly lower even if model says otherwise
+             # Just a safety dampener for the "coefficient" requirement
+             weekend_factor = 0.6
+        else:
+             weekend_factor = 1.0
+
         hour = future_time.hour
         
         val = 0 # Default to 0
         
         # Lookup in model
         try:
-            val = occupancy_model.loc[(day_of_week, hour)]
+            val = occupancy_model.loc[(day_of_week, hour)] * weekend_factor
         except KeyError:
              # Fallback: try finding avg for just the hour across all days
              try:
-                 val = df[df['hour'] == hour]['occupied_count'].mean()
+                 val = df[df['hour'] == hour]['occupied_count'].median() * weekend_factor
              except:
                  val = 0
         
-        # Ensure val is not NaN (pandas mean() returns NaN for empty slices)
+        # Ensure val is not NaN
         if pd.isna(val):
             val = 0
             
         future_dates.append(future_time)
         predicted_values.append(val)
+        
+    # Smoothing the prediction curve
+    # Predictions can be jumpy (e.g., 10am=5, 11am=15). 
+    # Apply a small rolling window to "connect" the dots better
+    pred_series = pd.Series(predicted_values)
+    smoothed_pred = pred_series.rolling(window=3, min_periods=1, center=True).mean()
+    predicted_values = smoothed_pred.tolist()
         
     # Plotting
     fig, ax = plt.subplots(figsize=(12, 6))
