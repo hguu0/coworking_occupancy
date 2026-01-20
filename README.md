@@ -2,7 +2,7 @@
 
 A web application for booking coworking spaces and monitoring their occupancy levels using historical data analysis.
 
-**Live Demo:** [(https://coworking-occupancy.pythonanywhere.com)](https://coworking-occupancy.onrender.com/)](https://coworking-occupancy.onrender.com/)
+**Live Demo:** (https://coworking-occupancy.onrender.com/)](https://coworking-occupancy.onrender.com/)
 
 ## Technologies
 *   **Python 3.13**
