@@ -17,10 +17,10 @@ A web application for booking coworking spaces and monitoring their occupancy le
 *   **Admin Dashboard:** Manage spaces, amenities, and view logs.
 
 ## Screenshots
-![Home Page](static/screenshots/home.png)
+<img width="1847" height="762" alt="image" src="https://github.com/user-attachments/assets/773b6fde-8daa-49b2-8a11-104ba9d661e8" />
 *List of coworking spaces*
 
-![Space Details](static/screenshots/detail.png)
+<img width="1726" height="916" alt="image" src="https://github.com/user-attachments/assets/2f8d99cc-cd52-42ff-a74f-769e76e43822" />
 *Space details with occupancy graph*
 
 ## Local Installation
@@ -69,9 +69,5 @@ This project is configured for deployment on PythonAnywhere.
 3.  Run migrations & collectstatic.
 4.  Configure WSGI file.
 
-Скриншоты
 
-<img width="1847" height="762" alt="image" src="https://github.com/user-attachments/assets/773b6fde-8daa-49b2-8a11-104ba9d661e8" />
-
-<img width="1726" height="916" alt="image" src="https://github.com/user-attachments/assets/2f8d99cc-cd52-42ff-a74f-769e76e43822" />
 
